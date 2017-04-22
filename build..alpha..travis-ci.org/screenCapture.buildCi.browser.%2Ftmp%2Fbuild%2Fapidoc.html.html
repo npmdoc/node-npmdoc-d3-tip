@@ -1,0 +1,253 @@
+<html><head></head><body><div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a href="https://github.com/Caged/d3-tip">d3-tip (v0.7.1)</a>
+</h1>
+<h4>Tooltips for d3 svg visualizations</h4>
+<div class="apidocSectionDiv"><a href="#apidoc.tableOfContents" id="apidoc.tableOfContents"><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.d3-tip">module d3-tip</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.d3-tip.d3-tip">
+            function <span class="apidocSignatureSpan"></span>d3-tip
+            <span class="apidocSignatureSpan">()</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.d3-tip" id="apidoc.module.d3-tip">module d3-tip</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.d3-tip.d3-tip" id="apidoc.element.d3-tip.d3-tip">
+        function <span class="apidocSignatureSpan"></span>d3-tip
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">d3-tip = function () {
+  var direction = d3_tip_direction,
+      offset    = d3_tip_offset,
+      html      = d3_tip_html,
+      node      = initNode(),
+      svg       = null,
+      point     = null,
+      target    = null
+
+  function tip(vis) {
+    svg = getSVGNode(vis)
+    point = svg.createSVGPoint()
+    document.body.appendChild(node)
+  }
+
+  // Public - show the tooltip on the screen
+  //
+  // Returns a tip
+  tip.show = function() {
+    var args = Array.prototype.slice.call(arguments)
+    if(args[args.length - 1] instanceof SVGElement) target = args.pop()
+
+    var content = html.apply(this, args),
+        poffset = offset.apply(this, args),
+        dir     = direction.apply(this, args),
+        nodel   = getNodeEl(),
+        i       = directions.length,
+        coords,
+        scrollTop  = document.documentElement.scrollTop || document.body.scrollTop,
+        scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
+
+    nodel.html(content)
+      .style('opacity', 1).style('pointer-events', 'all')
+
+    while(i--) nodel.classed(directions[i], false)
+    coords = direction_callbacks.get(dir).apply(this)
+    nodel.classed(dir, true)
+    	.style('top', (coords.top +  poffset[0]) + scrollTop + 'px')
+    	.style('left', (coords.left + poffset[1]) + scrollLeft + 'px')
+
+    return tip;
+  };
+
+  // Public - hide the tooltip
+  //
+  // Returns a tip
+  tip.hide = function() {
+    var nodel = getNodeEl()
+    nodel.style('opacity', 0).style('pointer-events', 'none')
+    return tip
+  }
+
+  // Public: Proxy attr calls to the d3 tip container.  Sets or gets attribute value.
+  //
+  // n - name of the attribute
+  // v - value of the attribute
+  //
+  // Returns tip or attribute value
+  tip.attr = function(n, v) {
+    if (arguments.length &lt; 2 &amp;&amp; typeof n === 'string') {
+      return getNodeEl().attr(n)
+    } else {
+      var args =  Array.prototype.slice.call(arguments)
+      d3.selection.prototype.attr.apply(getNodeEl(), args)
+    }
+
+    return tip
+  }
+
+  // Public: Proxy style calls to the d3 tip container.  Sets or gets a style value.
+  //
+  // n - name of the property
+  // v - value of the property
+  //
+  // Returns tip or style property value
+  tip.style = function(n, v) {
+    if (arguments.length &lt; 2 &amp;&amp; typeof n === 'string') {
+      return getNodeEl().style(n)
+    } else {
+      var args = Array.prototype.slice.call(arguments)
+      d3.selection.prototype.style.apply(getNodeEl(), args)
+    }
+
+    return tip
+  }
+
+  // Public: Set or get the direction of the tooltip
+  //
+  // v - One of n(north), s(south), e(east), or w(west), nw(northwest),
+  //     sw(southwest), ne(northeast) or se(southeast)
+  //
+  // Returns tip or direction
+  tip.direction = function(v) {
+    if (!arguments.length) return direction
+    direction = v == null ? v : functor(v)
+
+    return tip
+  }
+
+  // Public: Sets or gets the offset of the tip
+  //
+  // v - Array of [x, y] offset
+  //
+  // Returns offset or
+  tip.offset = function(v) {
+    if (!arguments.length) return offset
+    offset = v == null ? v : functor(v)
+
+    return tip
+  }
+
+  // Public: sets or gets the html value of the tooltip
+  //
+  // v - String value of the tip
+  //
+  // Returns html value or tip
+  tip.html = function(v) {
+    if (!arguments.length) return html
+    html = v == null ? v : functor(v)
+
+    return tip
+  }
+
+  // Public: destroys the tooltip and removes it from the DOM
+  //
+  // Returns a tip
+  tip.destroy = function() {
+    if(node) {
+      getNodeEl().remove();
+      node = null;
+    }
+    return tip;
+  }
+
+  function d3_tip_direction() { return 'n' }
+  function d3_tip_offset() { return [0, 0] }
+  function d3_tip_html() { return ' ' }
+
+  var direction_callbacks = d3.map({
+    n:  direction_n,
+    s:  direction_s,
+    e:  direction_e,
+    w:  direction_w,
+    nw: direction_nw,
+    ne: direction_ne,
+    sw: direction_sw,
+    se: direction_se
+  }),
+
+  directions = direction_callbacks.keys()
+
+  function direction_n() {
+    var bbox = getScreenBBox()
+    return {
+      top:  bbox.n.y - node.offsetHeight,
+      left: bbox.n.x - node.offsetWidth / 2
+    }
+  }
+
+  function direction_ ...</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
+</body></html>
